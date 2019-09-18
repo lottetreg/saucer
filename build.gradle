@@ -1,10 +1,14 @@
 plugins {
     id 'java'
+    id 'maven'
 }
 
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+group = 'com.github.lottetreg'
+
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
 
 repositories {
     mavenCentral()
@@ -12,4 +16,9 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+wrapper {
+    gradleVersion = "5.6.2"
+    distributionType = Wrapper.DistributionType.ALL
 }
