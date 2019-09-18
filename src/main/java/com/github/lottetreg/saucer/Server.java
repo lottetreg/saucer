@@ -1,7 +1,5 @@
 package com.github.lottetreg.saucer;
 
-import com.github.lottetreg.interfaces.Routable;
-
 public class Server implements Runnable {
   private Connection connection;
   private Routable router;

@@ -1,7 +1,5 @@
 package com.github.lottetreg.saucer;
 
-import com.github.lottetreg.interfaces.Routable;
-
 import java.io.IOException;
 
 public class Saucer {
