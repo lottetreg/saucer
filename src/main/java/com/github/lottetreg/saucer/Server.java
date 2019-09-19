@@ -1,6 +1,8 @@
 package com.github.lottetreg.saucer;
 
-public class Server implements Runnable {
+import java.io.IOException;
+
+class Server implements Runnable {
   private Connection connection;
   private Routable router;
 
@@ -15,7 +17,7 @@ public class Server implements Runnable {
 
     try {
       ParsedRequest parsedRequest = new ParsedRequest(connection.getInputStream(), new Out());
-      HttpRequest request = new HttpRequest(parsedRequest, new Out());
+      HttpRequest request = newHttpRequestFromParsedRequest(parsedRequest);
       response = router.route(request);
 
     } catch (ParsedRequest.BadRequest e) {
@@ -26,8 +28,18 @@ public class Server implements Runnable {
       e.printStackTrace();
 
     } finally {
-      writeToConnection(new HttpResponsePresenter(response).toBytes());
+      writeToConnection(response.toBytes());
     }
+  }
+
+  private HttpRequest newHttpRequestFromParsedRequest(ParsedRequest parsedRequest) throws IOException {
+    return new HttpRequest(
+        parsedRequest.getMethod(),
+        parsedRequest.getPath(),
+        parsedRequest.getProtocolVersion(),
+        parsedRequest.getHeaders(),
+        parsedRequest.readContent()
+    );
   }
 
   private void writeToConnection(byte[] response) {

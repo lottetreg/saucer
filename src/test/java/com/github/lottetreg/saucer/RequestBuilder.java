@@ -1,7 +1,9 @@
-package com.github.lottetreg.saucer.support;
+package com.github.lottetreg.saucer;
 
-public class RequestStringBuilder {
-  private static String CRLF = "\r\n";
+import java.io.ByteArrayInputStream;
+
+class RequestBuilder {
+  private String CRLF = "\r\n";
 
   private String method;
   private String path;
@@ -9,7 +11,7 @@ public class RequestStringBuilder {
   private String headers;
   private String body;
 
-  public RequestStringBuilder() {
+  RequestBuilder() {
     this.method = "";
     this.path = "";
     this.version = "HTTP/1.0";
@@ -17,35 +19,37 @@ public class RequestStringBuilder {
     this.body = "";
   }
 
-  public RequestStringBuilder setMethod(String method) {
+  RequestBuilder setMethod(String method) {
     this.method = method;
     return this;
   }
 
-  public RequestStringBuilder setPath(String path) {
+  RequestBuilder setPath(String path) {
     this.path = path;
     return this;
   }
 
-  public RequestStringBuilder setVersion(String version) {
+  RequestBuilder setVersion(String version) {
     this.version = version;
     return this;
   }
 
-  public RequestStringBuilder addHeader(String header) {
+  RequestBuilder addHeader(String header) {
     this.headers = this.headers.concat(header + this.CRLF);
     return this;
   }
 
-  public RequestStringBuilder setBody(String body) {
+  RequestBuilder setBody(String body) {
     this.body = body;
     return this;
   }
 
-  public String build() {
-    return this.method + " " + this.path + " " + this.version + this.CRLF +
+  ByteArrayInputStream toInputStream() {
+    String request = this.method + " " + this.path + " " + this.version + this.CRLF +
         this.headers +
         this.CRLF +
         this.body;
+
+    return new ByteArrayInputStream(request.getBytes());
   }
 }

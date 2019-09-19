@@ -3,6 +3,7 @@ package com.github.lottetreg.saucer;
 import org.junit.Test;
 import org.junit.Rule;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.rules.ExpectedException;
@@ -88,7 +89,7 @@ public class ConnectionTest {
 
     connection.close();
 
-    assertEquals(true, socket.isClosed());
+    assertTrue(socket.isClosed());
   }
 
   @Test

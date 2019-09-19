@@ -1,33 +1,28 @@
 package com.github.lottetreg.saucer;
 
-import com.github.lottetreg.saucer.support.RequestStringBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 public class HttpRequestTest {
   @Rule
   public ExpectedException exceptionRule = ExpectedException.none();
 
   @Test
-  public void itIsInitializedWithTheCorrectObjects() throws IOException {
-    String requestString = new RequestStringBuilder()
-        .setMethod("GET")
-        .setPath("/")
-        .addHeader("Content-Length: 17")
-        .setBody("some body to love")
-        .build();
-
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(requestString.getBytes());
-    ParsedRequest parsedRequest = new ParsedRequest(inputStream);
-
-    HttpRequest request = new HttpRequest(parsedRequest);
+  public void itIsInitializedWithTheCorrectObjects() {
+    HttpRequest request = new HttpRequest(
+        "GET",
+        "/",
+        "HTTP/1.0",
+        new HashMap<>(Map.of("Content-Length", "17")),
+        "some body to love"
+        );
 
     assertEquals("GET", request.getMethod());
     assertEquals("/", request.getPath());
@@ -37,64 +32,16 @@ public class HttpRequestTest {
   }
 
   @Test
-  public void itDoesNotSetTheBodyIfTheContentLengthIsMissing() throws IOException {
-    String requestString = new RequestStringBuilder()
-        .setMethod("GET")
-        .setPath("/")
-        .setBody("some body to love")
-        .build();
+  public void getHeaderReturnsNullIfTheHeaderDoesNotExist() {
+    HttpRequest request = new HttpRequest(
+        "GET",
+        "/",
+        "HTTP/1.0",
+        new HashMap<>(),
+        "some body to love"
+    );
 
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(requestString.getBytes());
-    ParsedRequest parsedRequest = new ParsedRequest(inputStream);
-
-    HttpRequest request = new HttpRequest(parsedRequest);
-
-    assertEquals("", request.getBody());
-  }
-
-  @Test
-  public void itLogsAMessageAndDoesNotSetTheBodyIfTheContentLengthIsNotANumber() throws IOException {
-    class MockOut implements Outable {
-      private boolean receivedPrintln;
-      private String message;
-
-      @Override
-      public void println(String message) {
-        this.receivedPrintln = true;
-        this.message = message;
-      }
-    }
-
-    String requestString = new RequestStringBuilder()
-        .setMethod("GET")
-        .setPath("/")
-        .addHeader("Content-Length: NaN")
-        .setBody("some body to love")
-        .build();
-
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(requestString.getBytes());
-    ParsedRequest parsedRequest = new ParsedRequest(inputStream);
-    MockOut mockOut = new MockOut();
-
-    HttpRequest request = new HttpRequest(parsedRequest, mockOut);
-
-    assertTrue(mockOut.receivedPrintln);
-    assertEquals("Invalid Content-Length: NaN", mockOut.message);
-    assertEquals("", request.getBody());
-  }
-
-  @Test
-  public void getHeaderReturnsNullIfTheHeaderDoesNotExist() throws IOException {
-    HttpRequest request = new RequestHelpers().buildHTTPRequest("GET", "/");
-
-    assertEquals(null, request.getHeader("Header 1"));
-  }
-
-  @Test
-  public void getContentLengthReturns0IfTheContentLengthDoesNotExist() throws IOException {
-    HttpRequest request = new RequestHelpers().buildHTTPRequest("GET", "/");
-
-    assertEquals(0, request.getContentLength());
+    assertNull(request.getHeader("Header 1"));
   }
 }
 

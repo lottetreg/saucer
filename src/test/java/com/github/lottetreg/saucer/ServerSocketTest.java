@@ -18,7 +18,7 @@ public class ServerSocketTest {
     class MockServerSocket extends java.net.ServerSocket {
       private boolean receivedAccept;
 
-      MockServerSocket() throws IOException {
+      private MockServerSocket() throws IOException {
       }
 
       public Socket accept() {

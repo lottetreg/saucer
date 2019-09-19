@@ -19,7 +19,7 @@ class StreamReader {
   }
 
   List<String> readLinesUntilEmptyLine() throws IOException {
-    List<String> lines = new ArrayList();
+    List<String> lines = new ArrayList<>();
     String line;
     while ((line = readLine()) != null && !line.isEmpty()) {
       lines.add(line);

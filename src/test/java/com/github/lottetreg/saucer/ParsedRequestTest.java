@@ -1,6 +1,5 @@
 package com.github.lottetreg.saucer;
 
-import com.github.lottetreg.saucer.support.RequestStringBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -8,42 +7,48 @@ import org.junit.rules.ExpectedException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ParsedRequestTest {
   @Rule
   public ExpectedException exceptionRule = ExpectedException.none();
 
+  class MockOut implements Outable {
+    boolean receivedPrintln;
+    String message;
+
+    @Override
+    public void println(String message) {
+      this.receivedPrintln = true;
+      this.message = message;
+    }
+  }
+
   @Test
   public void itCorrectlyParsesAValidRequest() throws IOException {
-    String request = new RequestStringBuilder()
+    ByteArrayInputStream inputStream = new RequestBuilder()
         .setMethod("GET")
         .setPath("/")
         .setVersion("HTTP/1.0")
         .addHeader("Valid-Header: something")
-        .build();
-
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        .toInputStream();
 
     ParsedRequest parsedRequest = new ParsedRequest(inputStream);
 
     assertEquals("GET", parsedRequest.getMethod());
     assertEquals("/", parsedRequest.getPath());
-    assertEquals("HTTP/1.0", parsedRequest.getVersion());
+    assertEquals("HTTP/1.0", parsedRequest.getProtocolVersion());
     assertEquals("something", parsedRequest.getHeaders().get("Valid-Header"));
   }
 
   @Test
   public void itSetsEmptyHeadersOnTheHeadersField() throws IOException {
-    String request = new RequestStringBuilder()
+    ByteArrayInputStream inputStream = new RequestBuilder()
         .setMethod("GET")
         .setPath("/")
         .setVersion("HTTP/1.0")
         .addHeader("Empty-Header: ")
-        .build();
-
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        .toInputStream();
 
     ParsedRequest parsedRequest = new ParsedRequest(inputStream);
 
@@ -52,38 +57,24 @@ public class ParsedRequestTest {
 
   @Test
   public void itLogsAMessageAndDoesNotSetInvalidHeadersOnTheHeadersField() throws IOException {
-    class MockOut implements Outable {
-      private boolean receivedPrintln;
-      private String message;
-
-      @Override
-      public void println(String message) {
-        this.receivedPrintln = true;
-        this.message = message;
-      }
-    }
-
-    String request = new RequestStringBuilder()
+    ByteArrayInputStream inputStream = new RequestBuilder()
         .setMethod("GET")
         .setPath("/")
         .setVersion("HTTP/1.0")
         .addHeader("Invalid-Header")
-        .build();
-
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        .toInputStream();
     MockOut mockOut = new MockOut();
 
     ParsedRequest parsedRequest = new ParsedRequest(inputStream, mockOut);
 
     assertTrue(mockOut.receivedPrintln);
     assertEquals("Invalid header: Invalid-Header", mockOut.message);
-    assertEquals(null, parsedRequest.getHeaders().get("Invalid-Header"));
+    assertNull(parsedRequest.getHeaders().get("Invalid-Header"));
   }
 
   @Test
   public void itThrowsAnExceptionIfTheInitialLineIsEmpty() throws IOException {
     String request = "\r\n\r\n";
-
     ByteArrayInputStream inputStream = new ByteArrayInputStream(request.getBytes());
 
     exceptionRule.expect(ParsedRequest.BadRequest.class);
@@ -95,7 +86,6 @@ public class ParsedRequestTest {
   @Test
   public void itThrowsAnExceptionIfTheInitialLineHasOnlyOneElement() throws IOException {
     String request = "GET \r\n\r\n";
-
     ByteArrayInputStream inputStream = new ByteArrayInputStream(request.getBytes());
 
     exceptionRule.expect(ParsedRequest.BadRequest.class);
@@ -107,7 +97,6 @@ public class ParsedRequestTest {
   @Test
   public void itThrowsAnExceptionIfTheInitialLineHasOnlyTwoElements() throws IOException {
     String request = "GET / \r\n\r\n";
-
     ByteArrayInputStream inputStream = new ByteArrayInputStream(request.getBytes());
 
     exceptionRule.expect(ParsedRequest.BadRequest.class);
@@ -115,5 +104,33 @@ public class ParsedRequestTest {
 
     new ParsedRequest(inputStream);
   }
-}
 
+  @Test
+  public void itDoesNotReadTheContentIfTheContentLengthIsMissing() throws IOException {
+    ByteArrayInputStream inputStream = new RequestBuilder()
+        .setMethod("GET")
+        .setPath("/")
+        .setBody("some body to love")
+        .toInputStream();
+
+    ParsedRequest parsedRequest = new ParsedRequest(inputStream);
+
+    assertEquals("", parsedRequest.readContent());
+  }
+
+  @Test
+  public void itLogsAMessageIfTheContentLengthIsNotANumber() throws IOException {
+    ByteArrayInputStream inputStream = new RequestBuilder()
+        .setMethod("GET")
+        .setPath("/")
+        .addHeader("Content-Length: NaN")
+        .setBody("some body to love")
+        .toInputStream();
+    MockOut mockOut = new MockOut();
+
+    new ParsedRequest(inputStream, mockOut).readContent();
+
+    assertTrue(mockOut.receivedPrintln);
+    assertEquals("Invalid 'Content-Length' in headers: NaN", mockOut.message);
+  }
+}

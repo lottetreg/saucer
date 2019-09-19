@@ -1,41 +1,36 @@
 package com.github.lottetreg.saucer;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class HttpResponse {
   private int statusCode;
   private HashMap<String, String> headers;
   private byte[] body;
   private String protocolVersion;
+  private String CRLF = "\r\n";
 
-  HttpResponse(Builder builder) {
+  private Map<Integer, String> statuses = Map.of(
+      200, "OK",
+      301, "Moved Permanently",
+      400, "Bad Request",
+      404, "Not Found",
+      405, "Method Not Allowed",
+      500, "Internal Server Error"
+  );
+
+  private HttpResponse(Builder builder) {
     this.statusCode = builder.statusCode;
     this.headers = builder.headers;
     this.body = builder.body;
     this.protocolVersion = builder.protocolVersion;
   }
 
-  int getStatusCode() {
-    return this.statusCode;
-  }
-
-  HashMap<String, String> getHeaders() {
-    return this.headers;
-  }
-
-  byte[] getBody() {
-    return this.body;
-  }
-
-  String getProtocolVersion() {
-    return this.protocolVersion;
-  }
-
   public static class Builder {
-    public int statusCode;
-    public HashMap<String, String> headers;
-    public byte[] body;
-    public String protocolVersion;
+    int statusCode;
+    HashMap<String, String> headers;
+    byte[] body;
+    String protocolVersion;
 
     public Builder(int statusCode) {
       this.statusCode = statusCode;
@@ -49,7 +44,7 @@ public class HttpResponse {
       return this;
     }
 
-    public Builder setHeaders(HashMap headers) {
+    public Builder setHeaders(HashMap<String, String> headers) {
       this.headers = headers;
       return this;
     }
@@ -57,5 +52,53 @@ public class HttpResponse {
     public HttpResponse build() {
       return new HttpResponse(this);
     }
+  }
+
+  byte[] toBytes() {
+    byte[] responseData = (initialLine() + joinedHeaders() + this.CRLF).getBytes();
+    return concatByteArrays(responseData, getBody());
+  }
+
+  private int getStatusCode() {
+    return this.statusCode;
+  }
+
+  private HashMap<String, String> getHeaders() {
+    return this.headers;
+  }
+
+  private byte[] getBody() {
+    return this.body;
+  }
+
+  private String getProtocolVersion() {
+    return this.protocolVersion;
+  }
+
+  private String initialLine() {
+    return getProtocolVersionString() + " " + getStatus() + this.CRLF;
+  }
+
+  private String getProtocolVersionString() {
+    return "HTTP/" + getProtocolVersion();
+  }
+
+  private String getStatus() {
+    return getStatusCode() + " " + this.statuses.get(getStatusCode());
+  }
+
+  private String joinedHeaders() {
+    return getHeaders().keySet().stream()
+        .map(key -> key + ": " + getHeaders().get(key) + this.CRLF)
+        .reduce("", (header, acc) -> acc + header);
+  }
+
+  private byte[] concatByteArrays(byte[] firstArray, byte[] secondArray) {
+    byte[] finalArray = new byte[firstArray.length + secondArray.length];
+
+    System.arraycopy(firstArray, 0, finalArray, 0, firstArray.length);
+    System.arraycopy(secondArray, 0, finalArray, firstArray.length, secondArray.length);
+
+    return finalArray;
   }
 }

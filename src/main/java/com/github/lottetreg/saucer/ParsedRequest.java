@@ -27,7 +27,7 @@ class ParsedRequest {
 
   private void parseRequest(InputStream inputStream) throws IOException {
     this.streamReader = new StreamReader(inputStream);
-    String initialLine = getStreamReader().readLine();
+    String initialLine = this.streamReader.readLine();
     Matcher parsedInitialLine = parseInitialLine(initialLine);
 
     try {
@@ -39,11 +39,7 @@ class ParsedRequest {
       throw new BadRequest("Incorrectly formatted initial line: " + initialLine, e);
     }
 
-    this.headers = parseHeaders(getStreamReader().readLinesUntilEmptyLine());
-  }
-
-  StreamReader getStreamReader() {
-    return this.streamReader;
+    this.headers = parseHeaders(this.streamReader.readLinesUntilEmptyLine());
   }
 
   String getMethod() {
@@ -54,12 +50,16 @@ class ParsedRequest {
     return this.path;
   }
 
-  String getVersion() {
+  String getProtocolVersion() {
     return this.version;
   }
 
   HashMap<String, String> getHeaders() {
     return this.headers;
+  }
+
+  String readContent() throws IOException {
+    return this.streamReader.readNChars(getContentLength());
   }
 
   private Matcher parseInitialLine(String initialLine) {
@@ -86,6 +86,18 @@ class ParsedRequest {
     }
 
     return validHeaders;
+  }
+
+  private int getContentLength() {
+    String contentLength = getHeaders().getOrDefault(
+        "Content-Length",
+        "0");
+    try {
+      return Integer.valueOf(contentLength);
+    } catch (NumberFormatException e) {
+      this.out.println("Invalid 'Content-Length' in headers: " + contentLength);
+      return 0;
+    }
   }
 
   static class BadRequest extends RuntimeException {
