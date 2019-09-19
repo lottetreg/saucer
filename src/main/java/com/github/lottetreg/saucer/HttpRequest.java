@@ -9,7 +9,7 @@ public class HttpRequest {
   private HashMap<String, String> headers;
   private String body;
 
-  HttpRequest(String method, String path, String protocolVersion, HashMap<String, String> headers, String body) {
+  public HttpRequest(String method, String path, String protocolVersion, HashMap<String, String> headers, String body) {
     this.method = method;
     this.path = path;
     this.protocolVersion = protocolVersion;
@@ -37,7 +37,7 @@ public class HttpRequest {
     return this.body;
   }
 
-  String getHeader(String headerName) {
+  public String getHeader(String headerName) {
     return getHeaders().get(headerName);
   }
 }
