@@ -59,19 +59,19 @@ public class HttpResponse {
     return concatByteArrays(responseData, getBody());
   }
 
-  private int getStatusCode() {
+  public int getStatusCode() {
     return this.statusCode;
   }
 
-  private HashMap<String, String> getHeaders() {
+  public HashMap<String, String> getHeaders() {
     return this.headers;
   }
 
-  private byte[] getBody() {
+  public byte[] getBody() {
     return this.body;
   }
 
-  private String getProtocolVersion() {
+  public String getProtocolVersion() {
     return this.protocolVersion;
   }
 
