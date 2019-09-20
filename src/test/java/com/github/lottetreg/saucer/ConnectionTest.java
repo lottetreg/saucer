@@ -1,15 +1,15 @@
 package com.github.lottetreg.saucer;
 
-import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.Rule;
-
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.io.*;
 import java.net.Socket;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class ConnectionTest {
   @Rule
@@ -17,6 +17,7 @@ public class ConnectionTest {
 
   @Test
   public void getInputStreamReturnsTheSocketsInputStream() throws IOException {
+    @Ignore
     class MockSocket extends Socket {
       private ByteArrayInputStream inputStream = new ByteArrayInputStream(new byte[]{});
 
@@ -34,9 +35,9 @@ public class ConnectionTest {
 
   @Test
   public void getOutputStreamReturnsTheSocketsOutputStream() throws IOException {
+    @Ignore
     class MockSocket extends Socket {
       private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      ;
 
       @Override
       public OutputStream getOutputStream() {
@@ -52,6 +53,7 @@ public class ConnectionTest {
 
   @Test
   public void getInputStreamThrowsAnException() {
+    @Ignore
     class MockSocket extends Socket {
       @Override
       public InputStream getInputStream() throws IOException {
@@ -68,6 +70,7 @@ public class ConnectionTest {
 
   @Test
   public void getOutputStreamThrowsAnException() {
+    @Ignore
     class MockSocket extends Socket {
       @Override
       public OutputStream getOutputStream() throws IOException {
@@ -94,6 +97,7 @@ public class ConnectionTest {
 
   @Test
   public void closeThrowsAnExceptionIfItFailsToCloseTheSocket() {
+    @Ignore
     class MockSocket extends Socket {
       @Override
       public void close() throws IOException {

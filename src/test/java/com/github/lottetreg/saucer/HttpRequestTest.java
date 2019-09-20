@@ -22,7 +22,7 @@ public class HttpRequestTest {
         "HTTP/1.0",
         new HashMap<>(Map.of("Content-Length", "17")),
         "some body to love"
-        );
+    );
 
     assertEquals("GET", request.getMethod());
     assertEquals("/", request.getPath());
