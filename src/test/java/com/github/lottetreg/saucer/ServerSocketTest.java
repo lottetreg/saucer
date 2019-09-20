@@ -1,5 +1,6 @@
 package com.github.lottetreg.saucer;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -15,6 +16,7 @@ public class ServerSocketTest {
 
   @Test
   public void theServerSocketReceivesAccept() throws IOException {
+    @Ignore
     class MockServerSocket extends java.net.ServerSocket {
       private boolean receivedAccept;
 

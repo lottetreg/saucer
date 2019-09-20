@@ -1,5 +1,6 @@
 package com.github.lottetreg.saucer;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -13,6 +14,7 @@ public class ParsedRequestTest {
   @Rule
   public ExpectedException exceptionRule = ExpectedException.none();
 
+  @Ignore
   class MockOut implements Outable {
     boolean receivedPrintln;
     String message;

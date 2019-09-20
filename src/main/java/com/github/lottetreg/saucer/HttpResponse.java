@@ -35,7 +35,7 @@ public class HttpResponse {
     public Builder(int statusCode) {
       this.statusCode = statusCode;
       this.headers = new HashMap<>();
-      this.body = new byte[] {};
+      this.body = new byte[]{};
       this.protocolVersion = "1.0";
     }
 

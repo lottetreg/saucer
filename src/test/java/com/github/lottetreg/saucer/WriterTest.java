@@ -1,12 +1,16 @@
 package com.github.lottetreg.saucer;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertEquals;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import java.io.*;
+import static org.junit.Assert.assertEquals;
 
 public class WriterTest {
   @Rule
@@ -14,6 +18,7 @@ public class WriterTest {
 
   @Test
   public void itWritesToTheConnection() {
+    @Ignore
     class MockConnection extends BaseMockConnection {
       private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -32,6 +37,7 @@ public class WriterTest {
 
   @Test
   public void itThrowsANewExceptionIfItFailsToGetOutputStream() {
+    @Ignore
     class MockConnection extends BaseMockConnection {
       @Override
       public OutputStream getOutputStream() {
@@ -43,9 +49,10 @@ public class WriterTest {
 
     exceptionRule.expect(Writer.FailedToWriteToConnection.class);
 
-    new Writer().write(connection, new byte[] {});
+    new Writer().write(connection, new byte[]{});
   }
 
+  @Ignore
   private class BaseMockConnection implements Connectionable {
     public OutputStream getOutputStream() {
       return new ByteArrayOutputStream();
