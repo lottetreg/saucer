@@ -4,11 +4,11 @@ import java.io.IOException;
 
 class Server implements Runnable {
   private Connection connection;
-  private Routable router;
+  private Respondable servlet;
 
-  Server(Connection connection, Routable router) {
+  Server(Connection connection, Respondable servlet) {
     this.connection = connection;
-    this.router = router;
+    this.servlet = servlet;
   }
 
   @Override
@@ -18,7 +18,7 @@ class Server implements Runnable {
     try {
       ParsedRequest parsedRequest = new ParsedRequest(connection.getInputStream(), new Out());
       HttpRequest request = newHttpRequestFromParsedRequest(parsedRequest);
-      response = router.route(request);
+      response = servlet.respond(request);
 
     } catch (ParsedRequest.BadRequest e) {
       e.printStackTrace();
